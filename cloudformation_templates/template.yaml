@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Resources:
-  TableCustomFieldsCustomFields:
+  DatabaseExample:
     Type: AWS::DynamoDB::Table
     Properties:
       AttributeDefinitions:
@@ -12,7 +12,18 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: 5
         WriteCapacityUnits: 5
-      TableName: LambdaName
+      TableName: myTable
+  SQSExample:
+    Type: AWS::SQS::Queue
+    Properties:
+      Subscription:
+        Endpoint:
+          Fn::GetAtt: [MyQueue1,Arn]
+          Protocol: sqs
+        Endpoint:
+          Fn::GetAtt: [MyQueue2,Arn]
+          Protocol: sqs
+      TopicName: SampleTopic
 
 
 # AWSTemplateFormatVersion: '2010-09-09'
