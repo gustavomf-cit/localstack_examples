@@ -31,17 +31,20 @@ awslocal lambda \
 if [[ $? != 0 ]]; then
     echo "Lambda already exists...delete and create again"
     
-    # awslocal lambda delete-function --function-name=$1
-    # awslocal lambda \
-    #     create-function --function-name=$1 \
-    #     --runtime=python3.5 \
-    #     --role=lambda_policy \
-    #     --handler=app.lambda_handler \
-    #     --zip-file fileb://lambda.zip
-    echo "Update lambda code only"
+    awslocal lambda delete-function --function-name=$1
     awslocal lambda \
-        update-function-code --function-name=$1 \
+        create-function --function-name=$1 \
+        --runtime=python3.5 \
+        --role=lambda_policy \
+        --handler=app.lambda_handler \
         --zip-file fileb://lambda.zip
+    # echo "Update lambda code only"
+    # awslocal lambda \
+    #     update-function-code --function-name=$1 \
+    #     --zip-file fileb://lambda.zip
 fi
 
-
+awslocal lambda invoke \
+            --invocation-type Event \
+            --function-name $1 \
+            outputfile.txt

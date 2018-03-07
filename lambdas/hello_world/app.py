@@ -8,7 +8,7 @@
 
 import json
 import boto3
-from models.utils.database import Database
+from models.utils.queues import QueueManager
 
 
 def lambda_handler(event, context):
@@ -18,11 +18,11 @@ def lambda_handler(event, context):
         :param context: lambda aws functions
     """
 
-    d = Database()
+    d = QueueManager()
     return {
         'statusCode': 200,
         'headers': {
             'Content-Type': 'application/json'
         },
-        'body': d.test()
+        'body': d.send_msg_queue('MyQueue1', 'test')
     }

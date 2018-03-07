@@ -1,1 +1,4 @@
 lambdas/hello_world/models/utils/database.py
+lambdas/lambda.zip
+lambdas/outputfile.txt
+*.pyc

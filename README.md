@@ -107,12 +107,12 @@ awslocal s3 mb s3://test
 ## Create stack using cloudformation
 
 ```bash
-awslocal cloudformation create-stack --template-body file://cloudformation_templates/template.yaml --stack-name sqs
+awslocal cloudformation create-stack --template-body file://cloudformation_templates/template.json --stack-name sqs
 ```
 
 ```bash
-lambda invoke \
-        --invocation-type Event \
-        --function-name hello_world \
-        outputfile.txt
+awslocal lambda invoke \
+            --invocation-type Event \
+            --function-name hello_world \
+            outputfile.txt
 ```
