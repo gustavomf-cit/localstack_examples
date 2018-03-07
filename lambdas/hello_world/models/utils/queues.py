@@ -16,6 +16,19 @@ class QueueManager(object):
     _queues = {}
 
     def __init__(self):
+        self.load_clients()
+        self.queues = self.client_sqs.list_queues()
+        for iurl in self.queues['QueueUrls']:
+            x = self.client_sqs.get_queue_attributes(
+                QueueUrl=iurl,
+                AttributeNames=['All'])['Attributes']['QueueArn']
+            queue_name = x.split(":")[-1]
+            self._queues[queue_name] = iurl
+
+    def list_queues(self):
+        return self._queues
+
+    def load_clients(self):
         self.client_sns = boto3.client(
             'sns',
             endpoint_url="http://localhost:4575",
@@ -30,10 +43,6 @@ class QueueManager(object):
             aws_access_key_id='ACCESS_KEY',
             aws_secret_access_key='SECRET_KEY',
             region_name='us-east-1')
-        self.queues = self.client_sqs.list_queues()
-        for i in self.queues['QueueUrls']:
-            print(i['QueueUrls'])
-            print(i['ResponseMetadata'])
 
     def create_sns_topic(self, topic_name='notifications-injection'):
         """
@@ -105,5 +114,6 @@ class QueueManager(object):
     def get_message_queue(self, queue_name):
         response = self.client_sqs.receive_message(
             QueueUrl=self._queues[queue_name])
-
-        return response
+        if 'Messages' not in response:
+            return False
+        return response['Messages']
