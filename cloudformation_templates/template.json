@@ -1,0 +1,53 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Resources": {
+    "DatabaseExample": {
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "id",
+            "AttributeType": "S"
+          }
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "id",
+            "KeyType": "HASH"
+          }
+        ],
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": 5,
+          "WriteCapacityUnits": 5
+        },
+        "TableName": "myTable"
+      }
+    },
+    "SQSExample": {
+      "Type": "AWS::SQS::Queue",
+      "Properties": {
+        "Subscription": [
+          {
+            "Endpoint": {
+              "Fn::GetAtt": [
+                "MyQueue1",
+                "Arn"
+              ]
+            },
+            "Protocol": "sqs"
+          },
+          {
+            "Endpoint": {
+              "Fn::GetAtt": [
+                "MyQueue2",
+                "Arn"
+              ]
+            },
+            "Protocol": "sqs"
+          }
+        ],
+        "TopicName": "SampleTopic"
+      }
+    }
+  }
+}
