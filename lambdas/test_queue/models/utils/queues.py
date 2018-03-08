@@ -182,17 +182,14 @@ class QueueManager(object):
             return dict(message='No messages in the queue'), 422
         return dict(message=response['Messages']), 200
 
-    def delete_msg_queue(self, message_id, receipt_handle):
+    def delete_msg_queue(self, queue_name, receipt_handle):
         """
         delete a message in the SQS queue
             :param self: itself
-            :param message_id: message id/arn
+            :param queue_name: queue name
             :param receipt_handle: receipt_handle from message
         """
-        response = self.client_sqs.delete_messages(Entries=[
-            {
-                'Id': message_id,
-                'ReceiptHandle': receipt_handle
-            },
-        ])
+        response = self.client_sqs.delete_message(
+            QueueUrl=self._queues[queue_name]['url'],
+            ReceiptHandle=receipt_handle)
         return dict(message=response), 200
