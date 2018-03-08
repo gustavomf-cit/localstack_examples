@@ -5,11 +5,14 @@ source $(pwd)/$1/bin/activate
 if [[ $? != 0 ]]; then
     exit 1;
 fi
+pip install -r $VIRTUAL_ENV/requeriments.txt
+
 echo $VIRTUAL_ENV/lib/python3.5/site-packages
 rm $ZIPFILE
 cd $VIRTUAL_ENV
 zip $ZIPFILE *.py
 zip -ur $ZIPFILE models
+
 
 cd $VIRTUAL_ENV/lib/python3.5/site-packages/
 zip -ur $ZIPFILE .
@@ -48,3 +51,6 @@ awslocal lambda invoke \
             --invocation-type Event \
             --function-name $1 \
             outputfile.txt
+
+
+rm $ZIPFILE

@@ -1,0 +1,9 @@
+python-tds
+python-logstash
+logstash_formatter
+python-dateutil
+pytest
+coverage
+requests
+pytest-cov
+boto3
