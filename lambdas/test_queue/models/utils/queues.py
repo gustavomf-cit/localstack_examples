@@ -167,11 +167,32 @@ class QueueManager(object):
     def get_message_queue(self, queue_name):
         """
         Get first message from queue
+        VisibilityTimeout default is 10 seconds, that is mean
+        if the message not been deleted in 30 seconds,
+        it will go back to queue, to be process by another lambda
             :param self: itself
             :param queue_name: queue name
         """
         response = self.client_sqs.receive_message(
-            QueueUrl=self._queues[queue_name]['url'])
+            QueueUrl=self._queues[queue_name]['url'],
+            MaxNumberOfMessages=1,
+            VisibilityTimeout=30,
+            WaitTimeSeconds=1)
         if 'Messages' not in response:
             return dict(message='No messages in the queue'), 422
         return dict(message=response['Messages']), 200
+
+    def delete_msg_queue(self, message_id, receipt_handle):
+        """
+        delete a message in the SQS queue
+            :param self: itself
+            :param message_id: message id/arn
+            :param receipt_handle: receipt_handle from message
+        """
+        response = self.client_sqs.delete_messages(Entries=[
+            {
+                'Id': message_id,
+                'ReceiptHandle': receipt_handle
+            },
+        ])
+        return dict(message=response), 200
