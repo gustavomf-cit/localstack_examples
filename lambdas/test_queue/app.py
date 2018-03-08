@@ -19,10 +19,18 @@ def lambda_handler(event, context):
     """
 
     d = QueueManager()
+    resp = d.get_message_queue('x')
+
+    message = json.dumps(resp[0])
+    print("ok")
+    print(message)
+    print("ok")
+    with open('../messages.sqs', 'a+') as filedump:
+        filedump.write(message)
     return {
-        'statusCode': 200,
+        'statusCode': resp[1],
         'headers': {
             'Content-Type': 'application/json'
         },
-        'body': json.dumps(d.get_message_queue('x'))
+        'body': message
     }

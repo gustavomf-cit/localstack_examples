@@ -60,7 +60,7 @@ class QueueManager(object):
         # then we will just get the topic returned.
         arn_value = self.client_sns.create_topic(Name=topic_name)['TopicArn']
         self._dict_topics[topic_name] = dict(arn=arn_value)
-        return arn_value
+        return dict(topic=arn_value), 200
 
     def create_sqs_queue(self, queue_name):
         """
@@ -76,7 +76,7 @@ class QueueManager(object):
             AttributeNames=['All'])['Attributes']['QueueArn']
         self._queues[queue_name] = dict(url=queue_url, arn=attr_queue)
 
-        return queue_url
+        return dict(queue_url=queue_url), 200
 
     def send_msg_queue(self, queue_name, message):
         """
@@ -90,7 +90,7 @@ class QueueManager(object):
         response = self.client_sqs.send_message(
             QueueUrl=self._queues[queue_name], MessageBody=message)
 
-        return response
+        return dict(response=response), 200
 
     def send_msg_topic(self, topic_name, message):
         """
@@ -107,10 +107,34 @@ class QueueManager(object):
         response = self.client_sns.publish(
             TopicArn=self._dict_topics[topic_name]['arn'],
             Message=json.dumps(message),
-            Subject='a short subject for your message',
+            Subject='SalesForce message',
             MessageStructure='json')
 
-        return response
+        return dict(response=response), 200
+
+    def check_exists_subscription(self, topic_name, service_name,
+                                  service_type):
+        """
+        check if a service to topic exists and do not duplicate it
+            :param self: itself
+            :param topic_name: topic name
+            :param service_name: name or arn, depends of service_type option
+            :param service_type: default is sqs, however there are other
+            options => sqs|lambda|http|https|application|sms|email
+        """
+        list_subscriptions = self.client_sns.list_subscriptions_by_topic(
+            TopicArn=self._dict_topics[topic_name]['arn'])
+        if 'Subscriptions' not in list_subscriptions:
+            return False
+
+        for i in list_subscriptions['Subscriptions']:
+            if ((i['Protocol'] == service_type) and
+                (((service_type == 'sqs') and
+                  (i['Endpoint'] == self._queues[service_name]['url'])) or
+                 (i['Endpoint'] == service_name))):
+                return True
+
+        return False
 
     def set_topic_service(self, topic_name, service_name, service_type='sqs'):
         """
@@ -121,6 +145,10 @@ class QueueManager(object):
             :param service_type: default is sqs, however there are other
             options => sqs|lambda|http|https|application|sms|email
         """
+        resp = self.check_exists_subscription(topic_name, service_name,
+                                              service_type)
+        if resp is True:
+            return dict(message='Already exists'), 422
         if service_type == 'sqs':
             subscribe = self.client_sns.subscribe(
                 TopicArn=self._dict_topics[topic_name]['arn'],
@@ -132,9 +160,9 @@ class QueueManager(object):
                 Protocol='lambda',
                 Endpoint=service_name)['SubscriptionArn']
         else:
-            return dict(message='Invalid service'), 400
+            return dict(message='Invalid service'), 422
 
-        return subscribe
+        return dict(subscribe=subscribe), 200
 
     def get_message_queue(self, queue_name):
         """
@@ -145,5 +173,5 @@ class QueueManager(object):
         response = self.client_sqs.receive_message(
             QueueUrl=self._queues[queue_name]['url'])
         if 'Messages' not in response:
-            return False
-        return response['Messages']
+            return dict(message='No messages in the queue'), 422
+        return dict(message=response['Messages']), 200
