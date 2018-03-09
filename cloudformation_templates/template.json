@@ -23,8 +23,8 @@
         "TableName": "myTable"
       }
     },
-    "SQSExample": {
-      "Type": "AWS::SQS::Queue",
+    "MySNSTopic": {
+      "Type": "AWS::SNS::Topic",
       "Properties": {
         "Subscription": [
           {
@@ -47,6 +47,33 @@
           }
         ],
         "TopicName": "SampleTopic"
+      }
+    },
+
+    "IntegrationQueue": {
+      "Type": "AWS::SQS::Queue",
+      "Properties": {
+        "Subscription": [
+          {
+            "Endpoint": {
+              "Fn::GetAtt": [
+                "integration-queue1",
+                "Arn"
+              ]
+            },
+            "Protocol": "sqs"
+          },
+          {
+            "Endpoint": {
+              "Fn::GetAtt": [
+                "integration-queue2",
+                "Arn"
+              ]
+            },
+            "Protocol": "sqs"
+          }
+        ],
+        "TopicName": "integration-topic"
       }
     }
   }
