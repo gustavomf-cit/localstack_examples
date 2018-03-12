@@ -19,7 +19,7 @@ def lambda_handler(event, context):
     """
 
     d = QueueManager()
-    resp = d.get_message_queue('x')
+    resp = d.get_message_queue('queuex')
 
     message = json.dumps(resp[0])
     print("ok")

@@ -54,6 +54,7 @@ class QueueManager(object):
         """
         Get or create the SNS topic.
             :param self: itself
+            :param topic_name: topic name
         """
         self.topic_name = topic_name
         # Creating a topic is idempotent, so if it already exists
